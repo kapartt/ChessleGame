@@ -92,6 +92,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="database.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="database.pgn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

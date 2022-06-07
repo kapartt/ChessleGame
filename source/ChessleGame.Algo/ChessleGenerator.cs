@@ -18,9 +18,9 @@ namespace ChessleGame.Algo
         {
             var variantsList = new List<PgnVariant>();
 
-            foreach (var line in _pgnDatabase.LinesAndCounts.Keys)
+            foreach (var line in _pgnDatabase.LinesAndInfo.Keys)
             {
-                variantsList.Add(new PgnVariant(line, _pgnDatabase.LinesAndCounts[line]));
+                variantsList.Add(new PgnVariant(line, _pgnDatabase.LinesAndInfo[line].TotalCount, _pgnDatabase.LinesAndInfo[line].GameInfo));
             }
 
             var rand = new Random();

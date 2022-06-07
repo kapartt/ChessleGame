@@ -22,6 +22,8 @@ namespace ChessleGame.UI.Model
                 CurrentMove = 0;
                 FontSize[i] = DefaultFontSize;
             }
+
+            IsSolved = false;
         }
 
         public string[] MovesNotation { get; set; }
@@ -31,6 +33,8 @@ namespace ChessleGame.UI.Model
         public int[] FontSize { get; set; }
 
         public int CurrentMove { get; set; }
+
+        public bool IsSolved { get; private set; }
 
         public void FillTransparent()
         {
@@ -42,12 +46,21 @@ namespace ChessleGame.UI.Model
 
         public void FillColorsCheckSubmission(char[] bullsCows)
         {
+            var solved = true;
+
             for (int i = 0; i < MovesCount; i++)
             {
                 MoveColors[i] = bullsCows[i] == BullsAndCowsCounter.Bull
                     ? ChessleColors.GreenMove
                     : bullsCows[i] == BullsAndCowsCounter.Cow ? ChessleColors.YellowMove : ChessleColors.GrayMove;
+
+                if (bullsCows[i] != BullsAndCowsCounter.Bull)
+                {
+                    solved = false;
+                }
             }
+
+            IsSolved = solved;
         }
     }
 }

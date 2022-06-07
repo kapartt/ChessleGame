@@ -6,7 +6,7 @@
         public static char Cow = '1';
         public static char Bull = '2';
 
-        public PgnVariant(string pgnMoves = "", int usingsCount = 0)
+        public PgnVariant(string pgnMoves = "", int usingsCount = 0, string gameInfo = "")
         {
             var pgnArray = pgnMoves.Split();
             Moves = new string[10];
@@ -30,11 +30,12 @@
             }
 
             UsingsCount = usingsCount;
+            GameInfo = gameInfo;
         }
 
         public string[] Moves { get; set; }
-
         public int UsingsCount { get; set; }
+        public string GameInfo { get; set; }
 
         public bool CanBeSolutionFor(PgnVariant submission, char[] bullsCows)
         {

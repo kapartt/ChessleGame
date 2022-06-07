@@ -14,9 +14,9 @@ namespace ChessleGame.Algo
 
             var variantsList = new List<PgnVariant>();
 
-            foreach (var line in database.LinesAndCounts.Keys)
+            foreach (var line in database.LinesAndInfo.Keys)
             {
-                variantsList.Add(new PgnVariant(line, database.LinesAndCounts[line]));
+                variantsList.Add(new PgnVariant(line, database.LinesAndInfo[line].TotalCount));
             }
 
             var submissionNumber = 1;

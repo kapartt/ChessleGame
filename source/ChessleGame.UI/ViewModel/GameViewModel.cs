@@ -22,6 +22,7 @@ namespace ChessleGame.UI.ViewModel
         private const double BoardBoundSize = 20;
         private readonly double _squareSize;
         private readonly INavigationManager _navigationManager;
+        private readonly PgnVariant _rightAnswer;
 
         private List<string> _clearedSquareBrushes;
         private BitmapImage _boardImage;
@@ -32,7 +33,8 @@ namespace ChessleGame.UI.ViewModel
         private string[] _squareBrushes;
         private bool[] _isContainsPiece;
         private PositionsHistory _history;
-        private PgnVariant _rightAnswer;
+        private bool _isSolved;
+        private string _gameInfo;
 
         private ObservableCollection<ChessleSubmissionVm> _submissionsList;
 
@@ -48,7 +50,9 @@ namespace ChessleGame.UI.ViewModel
 
             _submissionsList = new ObservableCollection<ChessleSubmissionVm>();
             _submissionsList.Add(new ChessleSubmissionVm());
-            _rightAnswer = new ChessleGenerator(@"database.pgn").GetRandomVariant();
+            _rightAnswer = new ChessleGenerator(@"database.csv").GetRandomVariant();
+            _isSolved = false;
+            _gameInfo = string.Empty;
         }
 
         public void OnNavigatedTo(object arg)
@@ -102,6 +106,16 @@ namespace ChessleGame.UI.ViewModel
             }
         }
 
+        public string GameInfo
+        {
+            get => _gameInfo;
+            set
+            {
+                if (Equals(_gameInfo, value)) return;
+                _gameInfo = value;
+                RaisePropertyChanged(nameof(GameInfo));
+            }
+        }
 
         #endregion
 
@@ -131,6 +145,8 @@ namespace ChessleGame.UI.ViewModel
 
         public void SendSubmission()
         {
+            if (_isSolved) return;
+
             var lastSubmisison = SubmissionsList.LastOrDefault();
 
             if (lastSubmisison == null) return;
@@ -140,8 +156,20 @@ namespace ChessleGame.UI.ViewModel
                 var bullsCows = BullsAndCowsCounter.GetBullsAndCows(lastSubmisison, _rightAnswer);
 
                 lastSubmisison.FillColorsCheckSubmission(bullsCows);
-                SubmissionsList = new ObservableCollection<ChessleSubmissionVm>(SubmissionsList.ToList()) { new ChessleSubmissionVm() };
-                InitBoardAndHistory();
+                _isSolved = lastSubmisison.IsSolved;
+
+                SubmissionsList = new ObservableCollection<ChessleSubmissionVm>(SubmissionsList.ToList());
+
+                if (!_isSolved)
+                {
+                    SubmissionsList.Add(new ChessleSubmissionVm());
+                    InitBoardAndHistory();
+                }
+                else
+                {
+                    GameInfo = _rightAnswer.GameInfo;
+                }
+
                 return;
             }
 
@@ -159,6 +187,8 @@ namespace ChessleGame.UI.ViewModel
 
         public void UndoMove()
         {
+            if (_isSolved) return;
+
             if (_history.PositionsList.Count <= 1) return;
 
             _history.PositionsList.RemoveAt(_history.PositionsList.Count - 1);
@@ -171,6 +201,8 @@ namespace ChessleGame.UI.ViewModel
 
         public void ClickOnChessboardCommand(double x, double y, bool isDown)
         {
+            if (_isSolved) return;
+
             while (true)
             {
                 if (SubmissionsList.LastOrDefault()?.CurrentMove == ChessleSubmissionVm.MovesCount)

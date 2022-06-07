@@ -185,67 +185,74 @@
             <Button Grid.Column="1" Content="Отправить решение" Command="{Binding SendSubmissionCommand}"/>
         </Grid>
         <ScrollViewer Grid.Row="2" CanContentScroll="True" ScrollChanged="ScrollViewer_OnScrollChanged">
-            <ItemsControl ItemsSource="{Binding SubmissionsList}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type submission:ChessleSubmissionVm}">
-                        <Border BorderBrush="Black"
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ItemsControl Grid.Row="0" ItemsSource="{Binding SubmissionsList}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type submission:ChessleSubmissionVm}">
+                            <Border BorderBrush="Black"
                                 BorderThickness="1">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="1." VerticalAlignment="Center"/>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[0]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[0]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[0]}"/>
-                                </Grid>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[1]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[1]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[1]}"/>
-                                </Grid>
-                                <TextBlock Text="2." VerticalAlignment="Center"/>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[2]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[2]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[2]}"/>
-                                </Grid>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[3]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[3]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[3]}"/>
-                                </Grid>
-                                <TextBlock Text="3." VerticalAlignment="Center"/>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[4]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[4]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[4]}"/>
-                                </Grid>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[5]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[5]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[5]}"/>
-                                </Grid>
-                                <TextBlock Text="4." VerticalAlignment="Center"/>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[6]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[6]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[6]}"/>
-                                </Grid>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[7]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[7]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[7]}"/>
-                                </Grid>
-                                <TextBlock Text="5." VerticalAlignment="Center"/>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[8]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[8]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[8]}"/>
-                                </Grid>
-                                <Grid Width="37" Height="37" Margin="5">
-                                    <Rectangle Fill="{Binding MoveColors[9]}" Stroke="Black" StrokeThickness="1"/>
-                                    <TextBlock Text="{Binding MovesNotation[9]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[9]}"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="1." VerticalAlignment="Center"/>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[0]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[0]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[0]}"/>
+                                    </Grid>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[1]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[1]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[1]}"/>
+                                    </Grid>
+                                    <TextBlock Text="2." VerticalAlignment="Center"/>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[2]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[2]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[2]}"/>
+                                    </Grid>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[3]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[3]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[3]}"/>
+                                    </Grid>
+                                    <TextBlock Text="3." VerticalAlignment="Center"/>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[4]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[4]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[4]}"/>
+                                    </Grid>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[5]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[5]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[5]}"/>
+                                    </Grid>
+                                    <TextBlock Text="4." VerticalAlignment="Center"/>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[6]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[6]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[6]}"/>
+                                    </Grid>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[7]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[7]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[7]}"/>
+                                    </Grid>
+                                    <TextBlock Text="5." VerticalAlignment="Center"/>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[8]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[8]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[8]}"/>
+                                    </Grid>
+                                    <Grid Width="37" Height="37" Margin="5">
+                                        <Rectangle Fill="{Binding MoveColors[9]}" Stroke="Black" StrokeThickness="1"/>
+                                        <TextBlock Text="{Binding MovesNotation[9]}" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding FontSize[9]}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Grid.Row="1" Text="{Binding GameInfo}" HorizontalAlignment="Center" Padding="5"/>
+            </Grid>
         </ScrollViewer>
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
