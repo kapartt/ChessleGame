@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="ChessleGame.UI.Views.MainMenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChessleGame.UI.Views"
+             xmlns:viewModel="clr-namespace:ChessleGame.UI.ViewModel"
+             xmlns:utils="clr-namespace:ChessleGame.UI.Utils"
+             xmlns:enums="clr-namespace:ChessleGame.UI.Enums"
+             d:DataContext="{d:DesignInstance d:Type=viewModel:MainMenuViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="576">
+    <Grid>
+        <Grid.Resources>
+            <utils:ComparisonConverter x:Key="ComparisonConverter" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="300"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center">
+            <RadioButton HorizontalAlignment = "Left"  
+                         Margin = "0,0,0,0" VerticalAlignment = "Top"  
+                         Content="Одиночная игра"
+                         IsChecked="{Binding Path=GameType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static enums:GameTypeVm.SinglePlayer}}"/>
+            <RadioButton HorizontalAlignment = "Left"  
+                         Margin = "0,0,0,0" VerticalAlignment = "Top" 
+                         Content="Против программы (скоро)"
+                         IsChecked="{Binding Path=GameType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static enums:GameTypeVm.AgainstUi}}"
+                         IsEnabled="False"/>
+            <RadioButton HorizontalAlignment = "Left"  
+                         Margin = "0,0,0,0" VerticalAlignment = "Top" 
+                         Content="Мультиплеер (скоро)"
+                         IsChecked="{Binding Path=GameType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static enums:GameTypeVm.MultiPlayer}}"
+                         IsEnabled="False"/>
+        </StackPanel>
+        <Button Grid.Row="2"  Margin="150,50,150,2" Content="Играть" Command="{Binding LaunchGameCommand}"/>
+    </Grid>
+</UserControl>
