@@ -1,4 +1,6 @@
-﻿using ChessleGame.UI.Utils;
+﻿using System.Collections.Generic;
+using System.Windows.Documents;
+using ChessleGame.UI.Utils;
 
 namespace ChessleGame.UI.Model
 {
@@ -61,6 +63,18 @@ namespace ChessleGame.UI.Model
             }
 
             IsSolved = solved;
+        }
+
+        public List<int> GetSuccessfulMoveIndexes()
+        {
+            var result = new List<int>();
+
+            for (int i = 0; i < MovesCount; i++)
+            {
+                if (MoveColors[i] == ChessleColors.GreenMove) result.Add(i);
+            }
+
+            return result;
         }
     }
 }

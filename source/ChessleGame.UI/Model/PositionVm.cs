@@ -14,6 +14,7 @@ namespace ChessleGame.UI.Model
             MoveOrder = MoveOrderTypeVm.White;
             WhiteCastlingRules = new CastlingRulesVm();
             BlackCastlingRules = new CastlingRulesVm();
+            LastMoveMotation = string.Empty;
         }
 
         public PieceTypeVm[] PiecesOnBoard { get; private set; }
@@ -22,6 +23,7 @@ namespace ChessleGame.UI.Model
         public CastlingRulesVm BlackCastlingRules { get; set; }
         public bool CanDoEnPassant { get; set; }
         public int EnPassantSquareId { get; set; }
+        public string LastMoveMotation { get; private set; }
 
         public PositionVm(PositionVm position)
         {
@@ -37,6 +39,7 @@ namespace ChessleGame.UI.Model
             BlackCastlingRules = new CastlingRulesVm(position.BlackCastlingRules);
             CanDoEnPassant = position.CanDoEnPassant;
             EnPassantSquareId = position.EnPassantSquareId;
+            LastMoveMotation = position.LastMoveMotation;
         }
 
         public void SetEmptyBoard()
@@ -91,6 +94,8 @@ namespace ChessleGame.UI.Model
                 MoveOrder = MoveOrderTypeVm.White
             };
 
+            position.LastMoveMotation = string.Empty;
+
             return position;
         }
 
@@ -101,7 +106,7 @@ namespace ChessleGame.UI.Model
             return movesList.Contains(endSquareId);
         }
 
-        public PositionVm GetNewPositionAfterMove(int beginSquareId, int endSquareId, out string moveNotation)
+        public PositionVm GetNewPositionAfterMove(int beginSquareId, int endSquareId)
         {
             var position = FromVmConverter.GetPosition(this);
             var square = FromVmConverter.GetSquareFromId(beginSquareId);
@@ -109,11 +114,12 @@ namespace ChessleGame.UI.Model
             var move = ChessLogicHelper.GetPossibleMovesForSelectedStartSquare(position, square)
                 .First(x => endSquareId == FromVmConverter.GetIdFromSquare(x.EndSquare));
 
-            moveNotation = NotationHelper.GetMoveNotation(position, move);
-
             var nextPosition = ChessLogicHelper.GetPositionAfterMove(position, move);
 
-            return FromVmConverter.GetPositionVm(nextPosition);
+            var nextPositionVm = FromVmConverter.GetPositionVm(nextPosition);
+            nextPositionVm.LastMoveMotation = NotationHelper.GetMoveNotation(position, move);
+
+            return nextPositionVm;
         }
 
         public List<int> GetPossibleMovesEndSquareIds(int beginSquareId)

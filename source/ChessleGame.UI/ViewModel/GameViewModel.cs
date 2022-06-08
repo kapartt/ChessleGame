@@ -23,6 +23,7 @@ namespace ChessleGame.UI.ViewModel
         private readonly double _squareSize;
         private readonly INavigationManager _navigationManager;
         private readonly PgnVariant _rightAnswer;
+        private readonly Dictionary<int, PositionVm> _guessedPosiitons;
 
         private List<string> _clearedSquareBrushes;
         private BitmapImage _boardImage;
@@ -35,11 +36,11 @@ namespace ChessleGame.UI.ViewModel
         private PositionsHistory _history;
         private bool _isSolved;
         private string _gameInfo;
-
         private ObservableCollection<ChessleSubmissionVm> _submissionsList;
 
         public GameViewModel(NavigationManager navigationManager)
         {
+            _isContainsPiece = new bool[ConstantsHelper.TotalSquaresCount];
             InitClearBrushes();
             InitBoardAndHistory();
             ClearSquareBrushes();
@@ -53,6 +54,7 @@ namespace ChessleGame.UI.ViewModel
             _rightAnswer = new ChessleGenerator(@"database.csv").GetRandomVariant();
             _isSolved = false;
             _gameInfo = string.Empty;
+            _guessedPosiitons = new Dictionary<int, PositionVm>();
         }
 
         public void OnNavigatedTo(object arg)
@@ -162,6 +164,11 @@ namespace ChessleGame.UI.ViewModel
 
                 if (!_isSolved)
                 {
+                    foreach (var success in lastSubmisison.GetSuccessfulMoveIndexes())
+                    {
+                        _guessedPosiitons[success] = _history.PositionsList[success + 1];
+                    }
+
                     SubmissionsList.Add(new ChessleSubmissionVm());
                     InitBoardAndHistory();
                 }
@@ -197,6 +204,38 @@ namespace ChessleGame.UI.ViewModel
             UpdateSubmissionOnUndoMove();
             ClearSquareBrushes();
             _isPreviouslyChoosedSquare = false;
+        }
+
+        private RelayCommand _playGuessedMovesCommand;
+
+        public ICommand PlayGuessedMovesCommand => _playGuessedMovesCommand ??= new RelayCommand(PlayGuessedMoves);
+
+        public void PlayGuessedMoves()
+        {
+            if (_isSolved) return;
+
+            var firstGuessedMovesCount = GetFirstGuessedMovesCount();
+
+            if (firstGuessedMovesCount == 0) return;
+
+            SubmissionsList.Remove(SubmissionsList.Last());
+            SubmissionsList.Add(new ChessleSubmissionVm());
+
+            InitBoardAndHistory();
+            ClearSquareBrushes();
+            _isPreviouslyChoosedSquare = false;
+            
+            for (int i = 0; i < firstGuessedMovesCount; i++)
+            {
+                var position = _guessedPosiitons[i];
+                _history.PositionsList.Add(position);
+                UpdateSubmissionOnNewMove(position.LastMoveMotation);
+
+                if (i == firstGuessedMovesCount - 1)
+                {
+                    SetPiecesFromPosition(position);
+                }
+            }
         }
 
         public void ClickOnChessboardCommand(double x, double y, bool isDown)
@@ -248,11 +287,9 @@ namespace ChessleGame.UI.ViewModel
                                 if (_previouslyChoosedSquareId != choosedSquareId)
                                     if (position.IsLegalMove(_previouslyChoosedSquareId, choosedSquareId))
                                     {
-                                        UpdateHistoryAfterNextMove(_previouslyChoosedSquareId, choosedSquareId, out var moveNotation);
+                                        UpdateHistoryAfterNextMove(_previouslyChoosedSquareId, choosedSquareId);
                                         SetPiecesFromPosition(_history.PositionsList.Last());
-                                        _isContainsPiece[choosedSquareId] = true;
-                                        _isContainsPiece[_previouslyChoosedSquareId] = false;
-                                        UpdateSubmissionOnNewMove(moveNotation);
+                                        UpdateSubmissionOnNewMove(_history.PositionsList.Last().LastMoveMotation);
                                     }
                                     else if (_isContainsPiece[choosedSquareId])
                                     {
@@ -296,7 +333,6 @@ namespace ChessleGame.UI.ViewModel
             if (position == null) return;
 
             var piecesImagesList = new List<BitmapImage>();
-            _isContainsPiece = new bool[ConstantsHelper.TotalSquaresCount];
 
             for (int i = 0; i < ConstantsHelper.TotalSquaresCount; i++)
             {
@@ -332,12 +368,11 @@ namespace ChessleGame.UI.ViewModel
             return ConstantsHelper.SquaresInLineCount * vertical + horizontal;
         }
 
-        private void UpdateHistoryAfterNextMove(int beginSquareId, int endSquareId, out string moveNotation)
+        private void UpdateHistoryAfterNextMove(int beginSquareId, int endSquareId)
         {
-            moveNotation = string.Empty;
             if (_history.PositionsList.Count == 0) return;
 
-            var positionAfterMove = _history.PositionsList.Last().GetNewPositionAfterMove(beginSquareId, endSquareId, out moveNotation);
+            var positionAfterMove = _history.PositionsList.Last().GetNewPositionAfterMove(beginSquareId, endSquareId);
             _history.PositionsList.Add(positionAfterMove);
         }
 
@@ -390,6 +425,16 @@ namespace ChessleGame.UI.ViewModel
             lastSubmission.FillTransparent();
 
             SubmissionsList = new ObservableCollection<ChessleSubmissionVm>(SubmissionsList.ToList());
+        }
+
+        private int GetFirstGuessedMovesCount()
+        {
+            for (int i = 0; i < ChessleSubmissionVm.MovesCount; i++)
+            {
+                if (!_guessedPosiitons.TryGetValue(i, out _)) return i;
+            }
+
+            return 0;
         }
 
         #endregion
