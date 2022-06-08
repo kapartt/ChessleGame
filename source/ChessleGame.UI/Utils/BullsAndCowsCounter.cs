@@ -32,6 +32,8 @@ namespace ChessleGame.UI.Utils
 
             for (int i = 0; i < bullsCows.Length; i++)
             {
+                if (bullsCows[i] == Bull) continue;
+
                 for (int j = 0; j < bullsCows.Length; j++)
                 {
                     if (i == j) continue;

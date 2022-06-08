@@ -434,7 +434,7 @@ namespace ChessleGame.UI.ViewModel
                 if (!_guessedPosiitons.TryGetValue(i, out _)) return i;
             }
 
-            return 0;
+            return ChessleSubmissionVm.MovesCount;
         }
 
         #endregion
