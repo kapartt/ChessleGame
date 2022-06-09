@@ -20,10 +20,17 @@ namespace ChessleGame.UI.ViewModel
     {
         private const double BoardTotalSize = 560;
         private const double BoardBoundSize = 20;
+        private const string DatabaseDir = @"database.csv";
+        private const int MaxEngineIterations = 100;
+        private const string SendSubmissionText = "Отправить решение";
+        private const string NewMoveText = "Начать ход №{0}";
+        private const string ShowEngineMoves = "Ответы компьютера";
+        private const string ShowYourMoves = "Свои ответы";
+
         private readonly double _squareSize;
         private readonly INavigationManager _navigationManager;
-        private readonly PgnVariant _rightAnswer;
-        private readonly Dictionary<int, PositionVm> _guessedPosiitons;
+        private PgnVariant _rightAnswer;
+        private Dictionary<int, PositionVm> _guessedPositions;
 
         private List<string> _clearedSquareBrushes;
         private BitmapImage _boardImage;
@@ -37,6 +44,9 @@ namespace ChessleGame.UI.ViewModel
         private bool _isSolved;
         private string _gameInfo;
         private ObservableCollection<ChessleSubmissionVm> _submissionsList;
+        private GameTypeVm _gameTypeVm;
+        private GameState _gameState;
+        private string _sendSubmissionButtonText;
 
         public GameViewModel(NavigationManager navigationManager)
         {
@@ -49,17 +59,71 @@ namespace ChessleGame.UI.ViewModel
             _squareSize = (BoardTotalSize - 2 * BoardBoundSize) / ConstantsHelper.SquaresInLineCount;
             _isPreviouslyChoosedSquare = false;
 
-            _submissionsList = new ObservableCollection<ChessleSubmissionVm>();
-            _submissionsList.Add(new ChessleSubmissionVm());
-            _rightAnswer = new ChessleGenerator(@"database.csv").GetRandomVariant();
+            _submissionsList = new ObservableCollection<ChessleSubmissionVm> {new ChessleSubmissionVm()};
+            _rightAnswer = new ChessleGenerator(DatabaseDir).GetRandomVariant();
             _isSolved = false;
             _gameInfo = string.Empty;
-            _guessedPosiitons = new Dictionary<int, PositionVm>();
+            _guessedPositions = new Dictionary<int, PositionVm>();
+            _gameState = new GameState();
+            _sendSubmissionButtonText = SendSubmissionText;
         }
 
         public void OnNavigatedTo(object arg)
         {
-            //_navigationManager.Navigate("MainMenu");
+            var args = arg as object[];
+            _gameTypeVm = (GameTypeVm)args[0];
+            var isNewGame = (bool)args[1];
+
+            if (_gameTypeVm == GameTypeVm.SinglePlayer) return;
+
+            if (isNewGame)
+            {
+                _gameState.EngineSubmissions = GetEngineSubmissions();
+                _gameState.RightAnswer = _rightAnswer;
+                _gameState.GameInfo = _rightAnswer.GameInfo;
+                return;
+            }
+
+            _gameState = args[2] as GameState;
+            if (_gameState == null) return;
+
+            _rightAnswer = _gameState.RightAnswer;
+            _guessedPositions = _gameState.GuessedPositions;
+
+            if (_gameState.PlayerSubmissions.Count >= 1)
+            {
+                _isSolved = _gameState.PlayerSubmissions.Last().IsSolved;
+            }
+
+            if (_isSolved)
+            {
+                GameInfo = _rightAnswer.GameInfo;
+                SetPiecesFromPosition(_gameState.EndingPositionVm);
+            }
+
+            if (_gameState.IsUserMove)
+            {
+                SendSubmissionButtonText = _isSolved ? ShowEngineMoves : SendSubmissionText;
+                SubmissionsList = new ObservableCollection<ChessleSubmissionVm>(_gameState.PlayerSubmissions);
+            }
+            else
+            {
+                SendSubmissionButtonText = _isSolved ? ShowYourMoves : string.Format(NewMoveText, _gameState.CurrentMove + 1);
+                if (_isSolved)
+                {
+                    SubmissionsList = new ObservableCollection<ChessleSubmissionVm>(_gameState.EngineSubmissions);
+                    return;
+                }
+
+                SubmissionsList = new ObservableCollection<ChessleSubmissionVm>();
+
+                for (int i = 0; i < Math.Min(_gameState.CurrentMove, _gameState.EngineSubmissions.Count); i++)
+                {
+                    var submission = new ChessleSubmissionVm(_gameState.EngineSubmissions[i]);
+                    if (!_isSolved) submission.ClearText();
+                    SubmissionsList.Add(submission);
+                }
+            }
         }
 
         #region Properties
@@ -119,6 +183,17 @@ namespace ChessleGame.UI.ViewModel
             }
         }
 
+        public string SendSubmissionButtonText
+        {
+            get => _sendSubmissionButtonText;
+            set
+            {
+                if (Equals(_sendSubmissionButtonText, value)) return;
+                _sendSubmissionButtonText = value;
+                RaisePropertyChanged(nameof(SendSubmissionButtonText));
+            }
+        }
+
         #endregion
 
         #region Commands
@@ -138,7 +213,13 @@ namespace ChessleGame.UI.ViewModel
 
         public void PlayAgain()
         {
-            _navigationManager.Navigate(UserControlKeys.Game);
+            var args = new object[2];
+            const bool isNewGame = true;
+
+            args[0] = _gameTypeVm;
+            args[1] = isNewGame;
+
+            _navigationManager.Navigate(UserControlKeys.Game, args);
         }
 
         private RelayCommand _sendSubmissionCommand;
@@ -147,26 +228,49 @@ namespace ChessleGame.UI.ViewModel
 
         public void SendSubmission()
         {
-            if (_isSolved) return;
+            object[] args;
 
-            var lastSubmisison = SubmissionsList.LastOrDefault();
-
-            if (lastSubmisison == null) return;
-
-            if (lastSubmisison.CurrentMove == ChessleSubmissionVm.MovesCount)
+            if (_gameTypeVm != GameTypeVm.SinglePlayer)
             {
-                var bullsCows = BullsAndCowsCounter.GetBullsAndCows(lastSubmisison, _rightAnswer);
+                args = new object[3];
+                args[0] = _gameTypeVm;
+                args[1] = false;
+                args[2] = _gameState;
 
-                lastSubmisison.FillColorsCheckSubmission(bullsCows);
-                _isSolved = lastSubmisison.IsSolved;
+                if (!_gameState.IsUserMove)
+                {
+                    _gameState.IsUserMove = true;
+                    if (!_isSolved) _gameState.CurrentMove++;
+                    _navigationManager.Navigate(UserControlKeys.Game, args);
+                    return;
+                }
+            }
+            else if (_isSolved) return;
+
+            var lastSubmission = SubmissionsList.LastOrDefault();
+
+            if (lastSubmission == null) return;
+
+            if (lastSubmission.CurrentMove == ChessleSubmissionVm.MovesCount)
+            {
+                var bullsCows = BullsAndCowsCounter.GetBullsAndCows(lastSubmission, _rightAnswer);
+
+                lastSubmission.FillColorsCheckSubmission(bullsCows);
+                _isSolved = lastSubmission.IsSolved;
 
                 SubmissionsList = new ObservableCollection<ChessleSubmissionVm>(SubmissionsList.ToList());
 
+
                 if (!_isSolved)
                 {
-                    foreach (var success in lastSubmisison.GetSuccessfulMoveIndexes())
+                    foreach (var success in lastSubmission.GetSuccessfulMoveIndexes())
                     {
-                        _guessedPosiitons[success] = _history.PositionsList[success + 1];
+                        _guessedPositions[success] = _history.PositionsList[success + 1];
+
+                        if (success == ChessleSubmissionVm.MovesCount - 1)
+                        {
+                            _gameState.EndingPositionVm = new PositionVm(_guessedPositions[success]);
+                        }
                     }
 
                     SubmissionsList.Add(new ChessleSubmissionVm());
@@ -177,12 +281,26 @@ namespace ChessleGame.UI.ViewModel
                     GameInfo = _rightAnswer.GameInfo;
                 }
 
-                return;
+                if (_gameTypeVm != GameTypeVm.SinglePlayer)
+                {
+                    if (_gameState.IsUserMove)
+                    {
+                        _gameState.IsUserMove = false;
+                        _gameState.GuessedPositions = _guessedPositions;
+                        _gameState.PlayerSubmissions = SubmissionsList.ToList();
+                    }
+
+                    args = new object[3];
+                    args[0] = _gameTypeVm;
+                    args[1] = false;
+                    args[2] = _gameState;
+                    _navigationManager.Navigate(UserControlKeys.Game, args);
+                }
             }
 
-            for (int i = lastSubmisison.CurrentMove; i < ChessleSubmissionVm.MovesCount; i++)
+            for (int i = lastSubmission.CurrentMove; i < ChessleSubmissionVm.MovesCount; i++)
             {
-                lastSubmisison.MoveColors[i] = ChessleColors.RedMove;
+                lastSubmission.MoveColors[i] = ChessleColors.RedMove;
             }
 
             SubmissionsList = new ObservableCollection<ChessleSubmissionVm>(SubmissionsList.ToList());
@@ -224,10 +342,10 @@ namespace ChessleGame.UI.ViewModel
             InitBoardAndHistory();
             ClearSquareBrushes();
             _isPreviouslyChoosedSquare = false;
-            
+
             for (int i = 0; i < firstGuessedMovesCount; i++)
             {
-                var position = _guessedPosiitons[i];
+                var position = _guessedPositions[i];
                 _history.PositionsList.Add(position);
                 UpdateSubmissionOnNewMove(position.LastMoveMotation);
 
@@ -431,10 +549,36 @@ namespace ChessleGame.UI.ViewModel
         {
             for (int i = 0; i < ChessleSubmissionVm.MovesCount; i++)
             {
-                if (!_guessedPosiitons.TryGetValue(i, out _)) return i;
+                if (!_guessedPositions.TryGetValue(i, out _)) return i;
             }
 
             return ChessleSubmissionVm.MovesCount;
+        }
+
+        private List<ChessleSubmissionVm> GetEngineSubmissions()
+        {
+            var solver = new ChessleSolver();
+            solver.InitSolver(DatabaseDir);
+
+            var submissions = new List<ChessleSubmissionVm>();
+
+            var isSolved = false;
+            var it = 0;
+
+            while (it < MaxEngineIterations && !isSolved)
+            {
+                var solverSubmission = solver.GetSubmission();
+                var submissionVm = new ChessleSubmissionVm { MovesNotation = solverSubmission };
+                var bullsCows = BullsAndCowsCounter.GetBullsAndCows(submissionVm, _rightAnswer);
+                submissionVm.FillColorsCheckSubmission(bullsCows);
+                solver.UpdateSolver(solverSubmission, bullsCows);
+
+                submissions.Add(submissionVm);
+                isSolved = submissionVm.IsSolved;
+                it++;
+            }
+
+            return submissions;
         }
 
         #endregion

@@ -1,93 +1,54 @@
 ﻿using ChessleGame.Algo.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ChessleGame.Algo
 {
-    public static class ChessleSolver
+    public class ChessleSolver
     {
-        public static void Solve(string databaseDir, bool firstRandomSubmission = false)
+        private List<PgnVariant> _possibleAnswers;
+        private Random _random;
+
+        public ChessleSolver()
         {
+            _random = new Random();
+            _possibleAnswers = new List<PgnVariant>();
+        }
+
+        public void InitSolver(string databaseDir)
+        {
+            _random = new Random();
+            _possibleAnswers = new List<PgnVariant>();
+
             var database = new PgnDatabase();
             database.CreateDatabase(databaseDir);
 
-            var variantsList = new List<PgnVariant>();
+            _possibleAnswers = new List<PgnVariant>();
 
             foreach (var line in database.LinesAndInfo.Keys)
             {
-                variantsList.Add(new PgnVariant(line, database.LinesAndInfo[line].TotalCount));
+                _possibleAnswers.Add(new PgnVariant(line, database.LinesAndInfo[line].TotalCount));
             }
+        }
 
-            var submissionNumber = 1;
+        public string[] GetSubmission()
+        {
+            return _possibleAnswers.Count == 0 ? null : _possibleAnswers[_random.Next(_possibleAnswers.Count)].Moves;
+        }
 
-            variantsList = variantsList.OrderBy(x => -x.UsingsCount).ToList();
+        public void UpdateSolver(string[] submission, char[] bullsCows)
+        {
+            var newPossibleAnswers = new List<PgnVariant>();
 
-            while (variantsList.Count > 1)
+            foreach (var variant in _possibleAnswers)
             {
-                var currentSubmission = (submissionNumber == 1 && firstRandomSubmission)
-                    ? variantsList[new Random().Next(variantsList.Count)]
-                    : variantsList.First();
-
-                var bullsAndCowsString = "";
-
-                while (true)
+                if (variant.CanBeSolutionFor(new PgnVariant { Moves = submission }, bullsCows))
                 {
-                    Console.WriteLine($"Submission #{submissionNumber}: {currentSubmission}");
-
-                    while (bullsAndCowsString.Length < 10)
-                    {
-                        var line = Console.ReadLine();
-
-                        if (line != null)
-                        {
-                            foreach (var c in line)
-                            {
-                                if (c == '0' || c == '1' || c == '2')
-                                {
-                                    bullsAndCowsString += c;
-                                }
-                            }
-                        }
-                    }
-
-                    if (bullsAndCowsString.Length > 10)
-                    {
-                        bullsAndCowsString = "";
-                        Console.WriteLine("Try again");
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    newPossibleAnswers.Add(variant);
                 }
-
-                var possibleSolutions = new List<PgnVariant>();
-                var bullsAndCowsArray = bullsAndCowsString.ToCharArray();
-
-                foreach (var variant in variantsList)
-                {
-                    if (variant.CanBeSolutionFor(currentSubmission, bullsAndCowsArray))
-                    {
-                        possibleSolutions.Add(variant);
-                    }
-                }
-
-                variantsList = possibleSolutions.OrderBy(x => -x.UsingsCount).ToList();
-
-                submissionNumber++;
             }
 
-            if (variantsList.Count == 1)
-            {
-                Console.WriteLine($"Answer = {variantsList.First()}");
-                Console.ReadLine();
-            }
-            else
-            {
-                Console.WriteLine($"There is no solution");
-                Console.ReadLine();
-            }
+            _possibleAnswers = newPossibleAnswers;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace ChessleGame.Algo.Entities
+﻿using System;
+
+namespace ChessleGame.Algo.Entities
 {
     public class PgnVariant
     {
@@ -13,6 +15,8 @@
 
             var j = 1;
             var isWhiteMove = true;
+
+            if (pgnMoves == String.Empty) return;
 
             for (int i = 0; i < 10; i++)
             {

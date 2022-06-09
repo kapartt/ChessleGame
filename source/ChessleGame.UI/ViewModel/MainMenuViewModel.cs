@@ -36,7 +36,13 @@ namespace ChessleGame.UI.ViewModel
 
         public void LaunchGame()
         {
-            _navigationManager.Navigate(UserControlKeys.Game);
+            var parameters = new object[2];
+            const bool isNewGame = true;
+
+            parameters[0] = GameType;
+            parameters[1] = isNewGame;
+
+            _navigationManager.Navigate(UserControlKeys.Game, parameters);
         }
 
         public void OnNavigatedTo(object arg)

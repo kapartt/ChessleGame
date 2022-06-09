@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Windows.Documents;
-using ChessleGame.UI.Utils;
+﻿using ChessleGame.UI.Utils;
+using System.Collections.Generic;
 
 namespace ChessleGame.UI.Model
 {
@@ -26,6 +25,23 @@ namespace ChessleGame.UI.Model
             }
 
             IsSolved = false;
+        }
+
+        public ChessleSubmissionVm(ChessleSubmissionVm chessleSubmissionVm)
+        {
+            MovesNotation = new string[MovesCount];
+            MoveColors = new string[MovesCount];
+            FontSize = new int[MovesCount];
+
+            for (int i = 0; i < MovesCount; i++)
+            {
+                MovesNotation[i] = chessleSubmissionVm.MovesNotation[i];
+                MoveColors[i] = chessleSubmissionVm.MoveColors[i];
+                CurrentMove = chessleSubmissionVm.CurrentMove;
+                FontSize[i] = chessleSubmissionVm.FontSize[i];
+            }
+
+            IsSolved = chessleSubmissionVm.IsSolved;
         }
 
         public string[] MovesNotation { get; set; }
@@ -75,6 +91,16 @@ namespace ChessleGame.UI.Model
             }
 
             return result;
+        }
+
+        public void ClearText()
+        {
+            MovesNotation = new string[MovesCount];
+
+            for (int i = 0; i < MovesCount; i++)
+            {
+                MovesNotation[i] = string.Empty;
+            }
         }
     }
 }

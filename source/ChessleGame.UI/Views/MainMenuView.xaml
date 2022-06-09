@@ -26,9 +26,8 @@
                          IsChecked="{Binding Path=GameType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static enums:GameTypeVm.SinglePlayer}}"/>
             <RadioButton HorizontalAlignment = "Left"  
                          Margin = "0,0,0,0" VerticalAlignment = "Top" 
-                         Content="Против программы (скоро)"
-                         IsChecked="{Binding Path=GameType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static enums:GameTypeVm.AgainstUi}}"
-                         IsEnabled="False"/>
+                         Content="Против программы"
+                         IsChecked="{Binding Path=GameType, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static enums:GameTypeVm.AgainstUi}}"/>
             <RadioButton HorizontalAlignment = "Left"  
                          Margin = "0,0,0,0" VerticalAlignment = "Top" 
                          Content="Мультиплеер (скоро)"

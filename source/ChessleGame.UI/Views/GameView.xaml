@@ -184,7 +184,7 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Content="Отменить ход" Command="{Binding UndoMoveCommand}"/>
             <Button Grid.Column="1" Content="Сыграть ранее угаданное" Command="{Binding PlayGuessedMovesCommand}"/>
-            <Button Grid.Column="2" Content="Отправить решение" Command="{Binding SendSubmissionCommand}"/>
+            <Button Grid.Column="2" Content="{Binding SendSubmissionButtonText}" Command="{Binding SendSubmissionCommand}"/>
         </Grid>
         <ScrollViewer Grid.Row="2" CanContentScroll="True" ScrollChanged="ScrollViewer_OnScrollChanged">
             <Grid>
